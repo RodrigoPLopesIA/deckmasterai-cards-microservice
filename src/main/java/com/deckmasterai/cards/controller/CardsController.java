@@ -1,23 +1,33 @@
 package com.deckmasterai.cards.controller;
 
 
+import com.deckmasterai.cards.models.Card;
+import com.deckmasterai.cards.services.CardService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RequestMapping("api/v1/cards")
 @RestController
+@RequiredArgsConstructor
 public class CardsController {
 
 
+    private final CardService cardService;
     @GetMapping
-    public ResponseEntity index() {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<List<Card>> index() {
+
+        var cards = cardService.getCards();
+        return ResponseEntity.ok().body(cards);
     }
 
     // POST /cards
     @PostMapping
-    public ResponseEntity createCard(@RequestBody String card) {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Card> createCard(@RequestBody Card card) {
+        var cardCreated = this.cardService.create(card);
+        return ResponseEntity.ok().body(cardCreated);
     }
 
     // GET /cards/{id}
