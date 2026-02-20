@@ -1,15 +1,16 @@
 package com.deckmasterai.cards.services;
 
 
+import com.deckmasterai.cards.client.DeckClient;
 import com.deckmasterai.cards.dto.CardRequest;
 import com.deckmasterai.cards.dto.CardResponse;
-import com.deckmasterai.cards.factory.RequestCardFactory;
-import com.deckmasterai.cards.factory.ResponseCardFactory;
 import com.deckmasterai.cards.models.Card;
 import com.deckmasterai.cards.repository.CardRepository;
 import com.deckmasterai.mapper.CardMapper;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,11 @@ import org.springframework.stereotype.Service;
 public class CardService {
 
     private final CardRepository cardRepository;
+
+
     private final CardMapper cardMapper;
+
+    private final DeckClient deckClient;
     public Page<CardResponse> getCards(Pageable pageable) {
         return cardRepository.findAll(pageable).map(cardMapper::cardToCardResponse);
     }
@@ -47,5 +52,11 @@ public class CardService {
 
     public void delete(String id) {
         cardRepository.deleteById(id);
+    }
+
+    public Object getDecksByCardId(String id) {
+        var card = cardRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Card not found"));
+        return deckClient.getDecksByCardId(card.getId());
     }
 }

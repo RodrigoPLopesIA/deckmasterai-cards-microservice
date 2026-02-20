@@ -3,7 +3,6 @@ package com.deckmasterai.cards.controller;
 
 import com.deckmasterai.cards.dto.CardRequest;
 import com.deckmasterai.cards.dto.CardResponse;
-import com.deckmasterai.cards.models.Card;
 import com.deckmasterai.cards.services.CardService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+
 
 @RequestMapping("api/v1/cards")
 @RestController
@@ -37,21 +36,31 @@ public class CardsController {
 
     // GET /cards/{id}
     @GetMapping("/{id}")
-    public ResponseEntity getCardById(@PathVariable String id) {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<CardResponse> getCardById(@PathVariable String id) {
+        var card = this.cardService.getCardById(id);
+        return ResponseEntity.ok().body(card);
     }
+
+    @GetMapping("/{id}/decks")
+    public ResponseEntity<?> getDecksByCardId(@PathVariable String id) {
+        var decks = cardService.getDecksByCardId(id);
+        return ResponseEntity.ok().body(decks);
+    }
+    
 
     // PUT /cards/{id}
     @PutMapping("/{id}")
-    public ResponseEntity updateCard(@PathVariable String id,
+    public ResponseEntity<CardResponse> updateCard(@PathVariable String id,
                                      @Valid  @RequestBody CardRequest updatedCard) {
 
-        return ResponseEntity.ok().build();
+        var updatedCardResponse = this.cardService.update(id, updatedCard);
+        return ResponseEntity.ok().body(updatedCardResponse);
     }
 
     // DELETE /cards/{id}
     @DeleteMapping("/{id}")
-    public ResponseEntity deleteCard(@PathVariable String id) {
+    public ResponseEntity<Void> deleteCard(@PathVariable String id) {
+        this.cardService.delete(id);
         return ResponseEntity.ok().build();
     }
 

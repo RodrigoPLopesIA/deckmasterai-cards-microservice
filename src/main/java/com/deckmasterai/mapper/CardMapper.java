@@ -7,9 +7,8 @@ import com.deckmasterai.cards.dto.CardResponse;
 import com.deckmasterai.cards.models.Card;
 
 
-@Mapper
+@Mapper(componentModel =  "spring")
 public interface CardMapper {
-    CardMapper INSTANCE = Mappers.getMapper(CardMapper.class);
     
     CardResponse cardToCardResponse(Card card);
     Card cardRequestToCard(CardRequest cardRequest);
