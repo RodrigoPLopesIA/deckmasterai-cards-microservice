@@ -1,0 +1,16 @@
+services:
+  database:
+    image: mongo:latest
+    container_name: deckmasterai_database
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: deckmasterai
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./data:/data/db
+
+volumes:
+  data:

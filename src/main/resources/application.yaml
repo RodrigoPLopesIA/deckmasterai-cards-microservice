@@ -1,0 +1,8 @@
+server:
+  port: 8081
+spring:
+    application:
+        name: cards-microservice
+    
+    mongodb:
+        uri: mongodb://root:example@localhost:27017/deckmasterai?authSource=admin

@@ -1,9 +1,14 @@
 package com.deckmasterai.cards.controller;
 
 
+import com.deckmasterai.cards.dto.CardRequest;
+import com.deckmasterai.cards.dto.CardResponse;
 import com.deckmasterai.cards.models.Card;
 import com.deckmasterai.cards.services.CardService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,15 +22,15 @@ public class CardsController {
 
     private final CardService cardService;
     @GetMapping
-    public ResponseEntity<List<Card>> index() {
+    public ResponseEntity<Page<CardResponse>> index(Pageable pageable) {
 
-        var cards = cardService.getCards();
+        var cards = cardService.getCards(pageable);
         return ResponseEntity.ok().body(cards);
     }
 
     // POST /cards
     @PostMapping
-    public ResponseEntity<Card> createCard(@RequestBody Card card) {
+    public ResponseEntity<CardResponse> createCard(@Valid @RequestBody CardRequest card) {
         var cardCreated = this.cardService.create(card);
         return ResponseEntity.ok().body(cardCreated);
     }
@@ -39,7 +44,7 @@ public class CardsController {
     // PUT /cards/{id}
     @PutMapping("/{id}")
     public ResponseEntity updateCard(@PathVariable String id,
-                                           @RequestBody String updatedCard) {
+                                     @Valid  @RequestBody CardRequest updatedCard) {
 
         return ResponseEntity.ok().build();
     }
