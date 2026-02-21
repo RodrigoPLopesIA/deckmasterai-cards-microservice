@@ -7,11 +7,21 @@ spring:
     mongodb:
         uri: mongodb://root:example@localhost:27017/deckmasterai?authSource=admin
     
-    management:
-        endpoints:
-            web:
-                exposure:
-                    include: "*"
-        endpoint:
-            health:
-                show-details: always
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
+aws:
+  s3:
+    endpoint: http://localhost:9000
+    access-key: admin
+    secret-key: admin123
+    bucket: cards
+    region: us-east-1
+    
+

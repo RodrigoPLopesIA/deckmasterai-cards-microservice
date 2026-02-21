@@ -8,12 +8,13 @@ import com.deckmasterai.cards.exceptions.NotFoundException;
 import com.deckmasterai.cards.mapper.CardMapper;
 import com.deckmasterai.cards.models.Card;
 import com.deckmasterai.cards.repository.CardRepository;
+import com.deckmasterai.cards.strategies.MinioStorageStrategy;
 
 import lombok.RequiredArgsConstructor;
+import software.amazon.awssdk.services.s3.S3Client;
 
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -29,9 +30,7 @@ public class CardService {
     private final CardMapper cardMapper;
 
     private final DeckClient deckClient;
-    public Page<CardResponse> getCards(Pageable pageable) {
-        return cardRepository.findAll(pageable).map(cardMapper::cardToCardResponse);
-    }
+    private final MinioStorageStrategy minioStorageStrategy;
 
     public CardResponse create(CardRequest cardRequest){
         var cardMapped = cardMapper.cardRequestToCard(cardRequest);
@@ -39,18 +38,22 @@ public class CardService {
         return cardMapper.cardToCardResponse(saved);
     }
     
-    public CardResponse getCardById(String id) {
-        return cardRepository.findById(id)
-                .map(cardMapper::cardToCardResponse)
-                .orElseThrow(() -> new NotFoundException("Card not found"));
-    }
-
     public CardResponse update(String id, CardRequest cardRequest) {
         var cardEntity = cardRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Card not found"));
         var updatedCard = cardMapper.updateCardFromRequest(cardRequest, cardEntity);
         var savedCard = cardRepository.save(updatedCard);
         return cardMapper.cardToCardResponse(savedCard);
+    }
+    
+    public Page<CardResponse> getCards(Pageable pageable) {
+        return cardRepository.findAll(pageable).map(cardMapper::cardToCardResponse);
+    }
+
+    public CardResponse getCardById(String id) {
+        return cardRepository.findById(id)
+                .map(cardMapper::cardToCardResponse)
+                .orElseThrow(() -> new NotFoundException("Card not found"));
     }
 
     public void delete(String id) {
