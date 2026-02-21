@@ -77,7 +77,7 @@ public class CardsController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCard(@PathVariable String id) {
         this.cardService.delete(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
 }
