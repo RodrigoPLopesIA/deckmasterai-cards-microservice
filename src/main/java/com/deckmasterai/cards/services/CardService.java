@@ -4,9 +4,9 @@ package com.deckmasterai.cards.services;
 import com.deckmasterai.cards.client.DeckClient;
 import com.deckmasterai.cards.dto.CardRequest;
 import com.deckmasterai.cards.dto.CardResponse;
+import com.deckmasterai.cards.mapper.CardMapper;
 import com.deckmasterai.cards.models.Card;
 import com.deckmasterai.cards.repository.CardRepository;
-import com.deckmasterai.mapper.CardMapper;
 
 import lombok.RequiredArgsConstructor;
 
