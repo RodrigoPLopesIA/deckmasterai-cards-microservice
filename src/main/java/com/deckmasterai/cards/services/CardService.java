@@ -4,87 +4,114 @@ import com.deckmasterai.cards.client.DeckClient;
 import com.deckmasterai.cards.dto.CardRequest;
 import com.deckmasterai.cards.dto.CardResponse;
 import com.deckmasterai.cards.exceptions.NotFoundException;
+import com.deckmasterai.cards.exceptions.UnauthorizedException;
 import com.deckmasterai.cards.mapper.CardMapper;
 import com.deckmasterai.cards.models.Card;
 import com.deckmasterai.cards.repository.CardRepository;
 import com.deckmasterai.cards.strategies.FileStorageStrategy;
-import com.deckmasterai.cards.strategies.MinioStorageStrategy;
 
 import lombok.RequiredArgsConstructor;
-import software.amazon.awssdk.services.s3.S3Client;
-
-import java.util.List;
-import java.util.Optional;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class CardService {
 
     private final CardRepository cardRepository;
-
     private final CardMapper cardMapper;
-
     private final DeckClient deckClient;
     private final FileStorageStrategy storageStrategy;
 
-    public CardResponse create(CardRequest cardRequest) {
+    public CardResponse create(CardRequest cardRequest, String profileId) {
+        var card = cardMapper.cardRequestToCard(cardRequest);
+        card.setProfileId(profileId);
 
-        var cardMapped = cardMapper.cardRequestToCard(cardRequest);
+        var saved = cardRepository.save(card);
+        return cardMapper.cardToCardResponse(saved);
+    }
 
-        Card saved = cardRepository.save(cardMapped);
+    public CardResponse update(String id, CardRequest request, String profileId) {
+
+        var card = findCardById(id);
+
+        validateOwnership(card, profileId);
+
+        var updated = cardMapper.updateCardFromRequest(request, card);
+        var saved = cardRepository.save(updated);
 
         return cardMapper.cardToCardResponse(saved);
     }
 
-    public CardResponse update(String id, CardRequest cardRequest) {
-
-        var cardEntity = cardRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Card not found"));
-
-        var updatedCard = cardMapper.updateCardFromRequest(cardRequest, cardEntity);
-
-
-        var savedCard = cardRepository.save(updatedCard);
-
-        return cardMapper.cardToCardResponse(savedCard);
+    public Page<CardResponse> getCards(Pageable pageable, String profileId) {
+        return cardRepository
+                .findAll(pageable, profileId)
+                .map(cardMapper::cardToCardResponse);
     }
 
-    public Page<CardResponse> getCards(Pageable pageable) {
-        return cardRepository.findAll(pageable).map(cardMapper::cardToCardResponse);
-    }
-
-    public CardResponse getCardById(String id) {
-        return cardRepository.findById(id)
+    public CardResponse getCardById(String id, String profileId) {
+        return cardRepository
+                .findById(id, profileId)
                 .map(cardMapper::cardToCardResponse)
                 .orElseThrow(() -> new NotFoundException("Card not found"));
     }
 
-    public void delete(String id) {
-        cardRepository.deleteById(id);
+    public void delete(String id, String profileId) {
+
+        var card = findCardById(id);
+        validateOwnership(card, profileId);
+
+        cardRepository.deleteById(id, profileId);
     }
 
-    public List<String> getDecksByCardId(String id) {
-        var card = cardRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Card not found"));
+    public List<String> getDecksByCardId(String id, String profileId) {
+
+        var card = findCardById(id);
+        validateOwnership(card, profileId);
+
         return deckClient.getDecksByCardId(card.getId());
     }
 
-    public String getDeckByIdByCardId(String id, String deckId) {
-        var card = cardRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Card not found"));
+    public String getDeckByIdByCardId(String id, String deckId, String profileId) {
 
-        Optional<String> first = card.getDeckIds().stream().filter(d -> d.equals(deckId)).findFirst();
-        if (first.isEmpty()) {
+        var card = findCardById(id);
+        validateOwnership(card, profileId);
+
+        if (card.getDeckIds() == null ||
+                card.getDeckIds().stream().noneMatch(d -> d.equals(deckId))) {
             throw new NotFoundException("Deck not found for this card");
         }
 
-        return deckClient.getDeckByIdByCardId(card.getId(), first.get());
+        return deckClient.getDeckByIdByCardId(card.getId(), deckId);
+    }
 
+    public CardResponse uploadCardImage(String id, MultipartFile file) {
+
+        var card = findCardById(id);
+
+        handleImageUpload(card, file);
+
+        var saved = cardRepository.save(card);
+        return cardMapper.cardToCardResponse(saved);
+    }
+
+    // ================================
+    // PRIVATE METHODS
+    // ================================
+
+    private Card findCardById(String id) {
+        return cardRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Card not found"));
+    }
+
+    private void validateOwnership(Card card, String profileId) {
+        if (!card.getProfileId().equals(profileId)) {
+            throw new UnauthorizedException("You cannot access this card");
+        }
     }
 
     private void handleImageUpload(Card card, MultipartFile image) {
@@ -93,22 +120,14 @@ public class CardService {
             return;
         }
 
-        if (card.getImageUrl() != null && !card.getImageUrl().isEmpty() && !card.getImageUrl().startsWith("http")) {
+        if (card.getImageUrl() != null &&
+                !card.getImageUrl().isBlank() &&
+                !card.getImageUrl().startsWith("http")) {
+
             storageStrategy.delete(card.getImageUrl());
         }
 
         String imageKey = storageStrategy.upload(image);
         card.setImageUrl(imageKey);
-    }
-
-    public CardResponse uploadCardImage(String id, MultipartFile file) {
-        var card = cardRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Card not found"));
-
-        handleImageUpload(card, file);
-
-        var savedCard = cardRepository.save(card);
-
-        return cardMapper.cardToCardResponse(savedCard);
     }
 }

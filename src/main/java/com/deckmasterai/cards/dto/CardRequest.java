@@ -4,9 +4,11 @@ import com.deckmasterai.cards.enums.CardType;
 import com.deckmasterai.cards.enums.MonsterSubType;
 import com.deckmasterai.cards.enums.MonsterType;
 import jakarta.validation.constraints.*;
+import lombok.Builder;
 
 import java.util.List;
 
+@Builder
 public record CardRequest(
 
         @NotBlank(message = "Name is required")
