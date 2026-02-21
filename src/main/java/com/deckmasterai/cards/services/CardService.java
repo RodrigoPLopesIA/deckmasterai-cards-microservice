@@ -92,7 +92,7 @@ public class CardService {
             return;
         }
 
-        if (card.getImageUrl() != null) {
+        if (card.getImageUrl() != null && !card.getImageUrl().isEmpty() && !card.getImageUrl().startsWith("http")) {
             storageStrategy.delete(card.getImageUrl());
         }
 
