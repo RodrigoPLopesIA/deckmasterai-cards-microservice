@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Builder
@@ -32,7 +33,7 @@ public class Card {
     private Integer attack;
     private Integer defense;
     private String profileId;
-    private List<String> deckIds;
+    private List<String> deckIds = new ArrayList<>();
 
     private String imageUrl;
 

@@ -6,3 +6,12 @@ spring:
     
     mongodb:
         uri: mongodb://root:example@localhost:27017/deckmasterai?authSource=admin
+    
+    management:
+        endpoints:
+            web:
+                exposure:
+                    include: "*"
+        endpoint:
+            health:
+                show-details: always
