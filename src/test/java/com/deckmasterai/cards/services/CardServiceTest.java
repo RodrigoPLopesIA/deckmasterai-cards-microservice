@@ -183,4 +183,13 @@ public class CardServiceTest {
         // Verify
         Mockito.verify(cardRepository).findById("1234");
     }
+
+    @Test
+    @DisplayName("DELETE should delete a card")
+    void deleteCard() {
+        Mockito.doNothing().when(cardRepository).deleteById(Mockito.anyString());
+
+        cardService.delete("1234");
+        Mockito.verify(cardRepository).deleteById("1234");
+    }
 }
