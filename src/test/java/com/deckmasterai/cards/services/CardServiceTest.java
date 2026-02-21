@@ -12,9 +12,7 @@ import com.deckmasterai.cards.mapper.CardMapper;
 import com.deckmasterai.cards.models.Card;
 import com.deckmasterai.cards.repository.CardRepository;
 import com.deckmasterai.cards.strategies.FileStorageStrategy;
-import org.assertj.core.api.Assert;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -58,6 +56,7 @@ public class CardServiceTest {
     @BeforeEach()
     void setUp() {
         card = Card.builder()
+                .id("card123")
                 .name("Blue-Eyes White Dragon")
                 .type(CardType.MONSTER)
                 .attribute("LIGHT")
@@ -223,5 +222,100 @@ public class CardServiceTest {
 
         Mockito.verify(fileStorageStrategy).upload(file);
         Mockito.verify(cardRepository).save(card);
+    }
+
+    @Test
+    @DisplayName("GET decks by card id should return decks")
+    void getDecksByCardId_shouldReturnDecks() {
+
+        // Arrange
+        List<String> decksMock = List.of("deck1", "deck2");
+        Mockito.when(cardRepository.findById("card123"))
+                .thenReturn(Optional.of(card));
+        Mockito.when(deckClient.getDecksByCardId("card123"))
+                .thenReturn(decksMock);
+
+        // Act
+        Object result = cardService.getDecksByCardId("card123");
+
+        // Assert
+        Assertions.assertThat(result).isEqualTo(decksMock);
+        Mockito.verify(cardRepository).findById("card123");
+        Mockito.verify(deckClient).getDecksByCardId("card123");
+    }
+
+    @Test
+    @DisplayName("GET decks by card id should throw when card not found")
+    void getDecksByCardId_shouldThrowWhenNotFound() {
+
+        Mockito.when(cardRepository.findById("card123"))
+                .thenReturn(Optional.empty());
+
+        Assertions.assertThatThrownBy(() ->
+                        cardService.getDecksByCardId("card123")
+                ).isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Card not found");
+
+        Mockito.verify(cardRepository).findById("card123");
+        Mockito.verifyNoInteractions(deckClient);
+    }
+
+    @Test
+    @DisplayName("GET deck by id by card id should return deck")
+    void getDeckByIdByCardId_shouldReturnDeck() {
+
+        // Arrange
+        String deckId = "deck1";
+        card.setDeckIds(List.of("deck1", "deck2"));
+        String deckMock = "deck1-details";
+
+        Mockito.when(cardRepository.findById("card123"))
+                .thenReturn(Optional.of(card));
+        Mockito.when(deckClient.getDeckByIdByCardId("card123", deckId))
+                .thenReturn(deckMock);
+
+        // Act
+        Object result = cardService.getDeckByIdByCardId("card123", deckId);
+
+        // Assert
+        Assertions.assertThat(result).isEqualTo(deckMock);
+        Mockito.verify(cardRepository).findById("card123");
+        Mockito.verify(deckClient).getDeckByIdByCardId("card123", deckId);
+    }
+
+    @Test
+    @DisplayName("GET deck by id by card id should throw if deck not found")
+    void getDeckByIdByCardId_shouldThrowDeckNotFound() {
+
+        // Arrange
+        card.setDeckIds(List.of("deck1", "deck2"));
+
+        Mockito.when(cardRepository.findById("card123"))
+                .thenReturn(Optional.of(card));
+
+        // Act + Assert
+        Assertions.assertThatThrownBy(() ->
+                        cardService.getDeckByIdByCardId("card123", "deck3")
+                ).isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("Deck not found for this card");
+
+        Mockito.verify(cardRepository).findById("card123");
+        Mockito.verifyNoInteractions(deckClient);
+    }
+
+    @Test
+    @DisplayName("GET deck by id by card id should throw if card not found")
+    void getDeckByIdByCardId_shouldThrowCardNotFound() {
+
+        Mockito.when(cardRepository.findById("card123"))
+                .thenReturn(Optional.empty());
+
+        Assertions.assertThatThrownBy(() ->
+                        cardService.getDeckByIdByCardId("card123", "deck1")
+                ).isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("Card not found");
+
+        Mockito.verify(cardRepository).findById("card123");
+        Mockito.verifyNoInteractions(deckClient);
     }
 }
