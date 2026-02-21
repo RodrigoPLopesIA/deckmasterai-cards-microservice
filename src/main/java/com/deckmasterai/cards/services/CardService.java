@@ -4,6 +4,7 @@ package com.deckmasterai.cards.services;
 import com.deckmasterai.cards.client.DeckClient;
 import com.deckmasterai.cards.dto.CardRequest;
 import com.deckmasterai.cards.dto.CardResponse;
+import com.deckmasterai.cards.exceptions.NotFoundException;
 import com.deckmasterai.cards.mapper.CardMapper;
 import com.deckmasterai.cards.models.Card;
 import com.deckmasterai.cards.repository.CardRepository;
@@ -41,12 +42,12 @@ public class CardService {
     public CardResponse getCardById(String id) {
         return cardRepository.findById(id)
                 .map(cardMapper::cardToCardResponse)
-                .orElseThrow(() -> new RuntimeException("Card not found"));
+                .orElseThrow(() -> new NotFoundException("Card not found"));
     }
 
     public CardResponse update(String id, CardRequest cardRequest) {
         var cardEntity = cardRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Card not found"));
+                .orElseThrow(() -> new NotFoundException("Card not found"));
         var updatedCard = cardMapper.updateCardFromRequest(cardRequest, cardEntity);
         var savedCard = cardRepository.save(updatedCard);
         return cardMapper.cardToCardResponse(savedCard);
@@ -64,11 +65,11 @@ public class CardService {
 
     public Object getDeckByIdByCardId(String id, String deckId) {
         var card = cardRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Card not found"));
+                .orElseThrow(() -> new NotFoundException("Card not found"));
 
                 Optional<String> first = card.getDeckIds().stream().filter(d -> d.equals(deckId)).findFirst();
                 if (first.isEmpty()) {
-                    throw new RuntimeException("Deck not found for this card");
+                    throw new NotFoundException("Deck not found for this card");
                 }
         
         return deckClient.getDeckByIdByCardId(card.getId(), first.get());
