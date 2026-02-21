@@ -1,6 +1,5 @@
 package com.deckmasterai.cards.controller;
 
-
 import com.deckmasterai.cards.dto.CardRequest;
 import com.deckmasterai.cards.dto.CardResponse;
 import com.deckmasterai.cards.services.CardService;
@@ -8,9 +7,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.multipart.MultipartFile;
 
 
 @RequestMapping("api/v1/cards")
@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class CardsController {
 
-
     private final CardService cardService;
+
     @GetMapping
     public ResponseEntity<Page<CardResponse>> index(Pageable pageable) {
 
@@ -27,11 +27,29 @@ public class CardsController {
         return ResponseEntity.ok().body(cards);
     }
 
+    @PostMapping("/upload/{cardId}")
+    public ResponseEntity<CardResponse> uploadCardImage(
+            @PathVariable String cardId,
+            @RequestParam("file") MultipartFile file) {
+        var updatedCard = cardService.uploadCardImage(cardId, file);
+        return ResponseEntity.ok().body(updatedCard);
+    }
+    
     // POST /cards
-    @PostMapping
-    public ResponseEntity<CardResponse> createCard(@Valid @RequestBody CardRequest card) {
+    @PostMapping()
+    public ResponseEntity<CardResponse> createCard(
+            @RequestBody @Valid CardRequest card) {
         var cardCreated = this.cardService.create(card);
         return ResponseEntity.ok().body(cardCreated);
+    }
+
+    // PUT /cards/{id}
+    @PutMapping(value = "/{id}")
+    public ResponseEntity<CardResponse> updateCard(
+            @PathVariable String id,
+            @RequestBody @Valid CardRequest updatedCard) {
+        var updatedCardResponse = this.cardService.update(id, updatedCard);
+        return ResponseEntity.ok().body(updatedCardResponse);
     }
 
     // GET /cards/{id}
@@ -40,6 +58,7 @@ public class CardsController {
         var card = this.cardService.getCardById(id);
         return ResponseEntity.ok().body(card);
     }
+
     // GET /cards/{id}/decks
     @GetMapping("/{id}/decks")
     public ResponseEntity<?> getDecksByCardId(@PathVariable String id) {
@@ -52,16 +71,6 @@ public class CardsController {
     public ResponseEntity<?> getDeckByIdByCardId(@PathVariable String id, @PathVariable String deckId) {
         var decks = cardService.getDeckByIdByCardId(id, deckId);
         return ResponseEntity.ok().body(decks);
-    }
-    
-
-    // PUT /cards/{id}
-    @PutMapping("/{id}")
-    public ResponseEntity<CardResponse> updateCard(@PathVariable String id,
-                                     @Valid  @RequestBody CardRequest updatedCard) {
-
-        var updatedCardResponse = this.cardService.update(id, updatedCard);
-        return ResponseEntity.ok().body(updatedCardResponse);
     }
 
     // DELETE /cards/{id}
