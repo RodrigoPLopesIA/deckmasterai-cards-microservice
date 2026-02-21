@@ -26,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import java.util.List;
@@ -191,5 +192,36 @@ public class CardServiceTest {
 
         cardService.delete("1234");
         Mockito.verify(cardRepository).deleteById("1234");
+    }
+
+    @Test
+    @DisplayName("UPLOAD should upload image and update card")
+    void uploadCardImage_shouldUploadSuccessfully() {
+
+        // Arrange
+        MultipartFile file = Mockito.mock(MultipartFile.class);
+
+        Mockito.when(file.isEmpty()).thenReturn(false);
+
+        Mockito.when(cardRepository.findById("1234"))
+                .thenReturn(Optional.of(card));
+
+        Mockito.when(fileStorageStrategy.upload(file))
+                .thenReturn("new-image-key.png");
+
+        Mockito.when(cardRepository.save(Mockito.any(Card.class)))
+                .thenReturn(card);
+
+        Mockito.when(cardMapper.cardToCardResponse(Mockito.any(Card.class)))
+                .thenReturn(cardResponse);
+
+        // Act
+        var result = cardService.uploadCardImage("1234", file);
+
+        // Assert
+        Assertions.assertThat(result).isNotNull();
+
+        Mockito.verify(fileStorageStrategy).upload(file);
+        Mockito.verify(cardRepository).save(card);
     }
 }
