@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,6 +14,7 @@ import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 @Service
+@Primary
 public class MinioStorageStrategy implements FileStorageStrategy {
 
     private final S3Client s3Client;
@@ -26,6 +28,7 @@ public class MinioStorageStrategy implements FileStorageStrategy {
     }
 
     @Override
+    
     public String upload(MultipartFile file) {
 
         String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
