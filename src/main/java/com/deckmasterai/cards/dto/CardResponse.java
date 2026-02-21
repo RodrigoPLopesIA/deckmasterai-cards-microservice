@@ -9,7 +9,7 @@ import java.util.List;
 
 @Builder
 public record CardResponse(
-
+        String id,
         String name,
         CardType type,
         String attribute,

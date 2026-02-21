@@ -1,5 +1,7 @@
 package com.deckmasterai.mapper;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
 
 import com.deckmasterai.cards.dto.CardRequest;
@@ -11,9 +13,15 @@ import com.deckmasterai.cards.models.Card;
 public interface CardMapper {
     
     CardResponse cardToCardResponse(Card card);
+    
+    @Mapping(target = "id", ignore = true)
     Card cardRequestToCard(CardRequest cardRequest);
+    
     Card cardResponseToCard(CardResponse cardResponse);
+
     CardRequest cardToCardRequest(Card card);
 
-    Card updateCardFromRequest(CardRequest cardRequest, Card card);
+
+    @Mapping(target = "id", ignore = true)
+    Card updateCardFromRequest(CardRequest cardRequest, @MappingTarget Card card);
 }
