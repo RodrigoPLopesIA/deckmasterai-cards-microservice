@@ -6,7 +6,12 @@ spring:
     
     mongodb:
         uri: mongodb://root:example@localhost:27017/deckmasterai?authSource=admin
-    
+    security:
+        oauth2:
+          resourceserver:
+            jwt:
+              issuer-uri: http://localhost:8080/realms/masterdeckai-realm
+
 management:
   endpoints:
     web:
