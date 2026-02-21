@@ -13,6 +13,7 @@ import com.deckmasterai.cards.strategies.MinioStorageStrategy;
 import lombok.RequiredArgsConstructor;
 import software.amazon.awssdk.services.s3.S3Client;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -67,13 +68,13 @@ public class CardService {
         cardRepository.deleteById(id);
     }
 
-    public Object getDecksByCardId(String id) {
+    public List<String> getDecksByCardId(String id) {
         var card = cardRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Card not found"));
         return deckClient.getDecksByCardId(card.getId());
     }
 
-    public Object getDeckByIdByCardId(String id, String deckId) {
+    public String getDeckByIdByCardId(String id, String deckId) {
         var card = cardRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Card not found"));
 
