@@ -9,4 +9,8 @@ public interface DeckClient {
     
     @GetMapping("/api/v1/card/{cardId}/decks")
     public String getDecksByCardId(String cardId);
+
+
+    @GetMapping("/api/v1/card/{cardId}/decks/{deckId}")
+    public String getDeckByIdByCardId(String cardId, String deckId);
 }

@@ -40,10 +40,17 @@ public class CardsController {
         var card = this.cardService.getCardById(id);
         return ResponseEntity.ok().body(card);
     }
-
+    // GET /cards/{id}/decks
     @GetMapping("/{id}/decks")
     public ResponseEntity<?> getDecksByCardId(@PathVariable String id) {
         var decks = cardService.getDecksByCardId(id);
+        return ResponseEntity.ok().body(decks);
+    }
+
+    // GET /cards/{id}/decks
+    @GetMapping("/{id}/decks/{deckId}")
+    public ResponseEntity<?> getDeckByIdByCardId(@PathVariable String id, @PathVariable String deckId) {
+        var decks = cardService.getDeckByIdByCardId(id, deckId);
         return ResponseEntity.ok().body(decks);
     }
     

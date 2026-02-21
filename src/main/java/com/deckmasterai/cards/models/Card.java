@@ -32,6 +32,7 @@ public class Card {
     private Integer attack;
     private Integer defense;
     private String profileId;
+    private List<String> deckIds;
 
     private String imageUrl;
 

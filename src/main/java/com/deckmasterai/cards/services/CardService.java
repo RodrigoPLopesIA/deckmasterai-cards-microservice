@@ -10,6 +10,8 @@ import com.deckmasterai.mapper.CardMapper;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -58,5 +60,18 @@ public class CardService {
         var card = cardRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Card not found"));
         return deckClient.getDecksByCardId(card.getId());
+    }
+
+    public Object getDeckByIdByCardId(String id, String deckId) {
+        var card = cardRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Card not found"));
+
+                Optional<String> first = card.getDeckIds().stream().filter(d -> d.equals(deckId)).findFirst();
+                if (first.isEmpty()) {
+                    throw new RuntimeException("Deck not found for this card");
+                }
+        
+        return deckClient.getDeckByIdByCardId(card.getId(), first.get());
+    
     }
 }
