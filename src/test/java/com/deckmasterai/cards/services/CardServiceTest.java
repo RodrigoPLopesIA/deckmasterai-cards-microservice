@@ -7,6 +7,7 @@ import com.deckmasterai.cards.dto.CardResponse;
 import com.deckmasterai.cards.enums.CardType;
 import com.deckmasterai.cards.enums.MonsterSubType;
 import com.deckmasterai.cards.enums.MonsterType;
+import com.deckmasterai.cards.exceptions.NotFoundException;
 import com.deckmasterai.cards.mapper.CardMapper;
 import com.deckmasterai.cards.models.Card;
 import com.deckmasterai.cards.repository.CardRepository;
@@ -154,5 +155,24 @@ public class CardServiceTest {
 
         Assertions.assertThat(card).isNotNull();
 
+    }
+
+    @Test
+    @DisplayName("PUT update a card should return not found")
+    void updateCardTest_shouldReturnNotFound() {
+
+        // Arrange
+        Mockito.when(cardRepository.findById(Mockito.anyString()))
+                .thenReturn(Optional.empty());
+
+        // Act + Assert
+        Assertions.assertThatThrownBy(() ->
+                        cardService.update("1234", cardRequest)
+                )
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("Card not found");
+
+        // Verify
+        Mockito.verify(cardRepository).findById("1234");
     }
 }
