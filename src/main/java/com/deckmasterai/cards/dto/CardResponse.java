@@ -17,6 +17,7 @@ public record CardResponse(
         Integer attack,
         Integer defense,
         String profileId,
+        List<String> deckIds,
         String imageUrl,
         String description,
         MonsterType monsterType,

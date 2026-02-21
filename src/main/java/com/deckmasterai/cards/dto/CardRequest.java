@@ -33,6 +33,8 @@ public record CardRequest(
         @NotBlank(message = "ProfileId is required")
         String profileId,
 
+        List<String> deckIds,
+
         @NotBlank(message = "ImageUrl is required")
         String imageUrl,
 
