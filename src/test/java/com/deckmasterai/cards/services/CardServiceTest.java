@@ -98,17 +98,11 @@ public class CardServiceTest {
                 MonsterType.SPELLCASTER,
                 List.of(MonsterSubType.NORMAL)
         );
-
-
-
-        /*Mockito.when(cardMapper.cardRequestToCard(Mockito.any(CardRequest.class))).thenReturn(card);
-        Mockito.when(cardMapper.cardToCardRequest(Mockito.any(Card.class))).thenReturn(cardRequest);
-        Mockito.when(cardMapper.updateCardFromRequest(Mockito.any(CardRequest.class), Mockito.any(Card.class))).thenReturn(card);*/
     }
 
     @Test
     @DisplayName("GET all cards")
-    void getAllCards() {
+    void getAllCardsTest() {
 
         // Arrange
         Page<Card> page = new PageImpl<>(List.of(card));
@@ -130,5 +124,19 @@ public class CardServiceTest {
 
         Mockito.verify(cardRepository)
                 .findAll(PageRequest.of(0, 10));
+    }
+
+    @Test
+    @DisplayName("POST create a card")
+    void createCardTest(){
+        Mockito.when(cardMapper.cardRequestToCard(Mockito.any(CardRequest.class))).thenReturn(card);
+        Mockito.when(cardMapper.cardToCardResponse(Mockito.any(Card.class)))
+                .thenReturn(cardResponse);
+        Mockito.when(cardRepository.save(Mockito.any(Card.class))).thenReturn(card);
+
+        var card = cardService.create(cardRequest);
+
+        Assertions.assertThat(card).isNotNull();
+
     }
 }
