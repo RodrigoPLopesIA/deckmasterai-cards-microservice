@@ -7,6 +7,7 @@ import com.deckmasterai.cards.dto.CardResponse;
 import com.deckmasterai.cards.enums.CardType;
 import com.deckmasterai.cards.enums.MonsterSubType;
 import com.deckmasterai.cards.enums.MonsterType;
+import com.deckmasterai.cards.exceptions.NotFoundException;
 import com.deckmasterai.cards.mapper.CardMapper;
 import com.deckmasterai.cards.models.Card;
 import com.deckmasterai.cards.repository.CardRepository;
@@ -28,6 +29,7 @@ import org.springframework.data.domain.PageRequest;
 
 
 import java.util.List;
+import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 public class CardServiceTest {
@@ -98,12 +100,6 @@ public class CardServiceTest {
                 MonsterType.SPELLCASTER,
                 List.of(MonsterSubType.NORMAL)
         );
-
-
-
-        /*Mockito.when(cardMapper.cardRequestToCard(Mockito.any(CardRequest.class))).thenReturn(card);
-        Mockito.when(cardMapper.cardToCardRequest(Mockito.any(Card.class))).thenReturn(cardRequest);
-        Mockito.when(cardMapper.updateCardFromRequest(Mockito.any(CardRequest.class), Mockito.any(Card.class))).thenReturn(card);*/
     }
 
     @Test
@@ -130,5 +126,61 @@ public class CardServiceTest {
 
         Mockito.verify(cardRepository)
                 .findAll(PageRequest.of(0, 10));
+    }
+
+    @Test
+    @DisplayName("POST should create a card")
+    void createCard() {
+        Mockito.when(cardMapper.cardToCardResponse(Mockito.any(Card.class)))
+                .thenReturn(cardResponse);
+        Mockito.when(cardMapper.cardRequestToCard(Mockito.any(CardRequest.class))).thenReturn(card);
+        Mockito.when(cardRepository.save(Mockito.any(Card.class))).thenReturn(card);
+
+        var card = cardService.create(cardRequest);
+
+        Assertions.assertThat(card).isNotNull();
+        Mockito.verify(cardRepository).save(Mockito.any(Card.class));
+    }
+
+    @Test
+    @DisplayName("PUT should update a card")
+    void updateCardTest() {
+
+        // Arrange
+        Mockito.when(cardMapper.updateCardFromRequest(Mockito.any(CardRequest.class), Mockito.any(Card.class))).thenReturn(card);
+        Mockito.when(cardMapper.cardToCardResponse(Mockito.any(Card.class)))
+                .thenReturn(cardResponse);
+        Mockito.when(cardRepository.findById(Mockito.anyString()))
+                .thenReturn(Optional.of(card));
+        Mockito.when(cardRepository.save(Mockito.any(Card.class))).thenReturn(card);
+
+        // Act + Assert
+
+        var card = cardService.update("1234", cardRequest);
+
+
+        // Verify
+        Assertions.assertThat(card).isNotNull();
+        Mockito.verify(cardRepository).findById("1234");
+    }
+
+
+    @Test
+    @DisplayName("PUT update a card should return not found")
+    void updateCardTest_shouldReturnNotFound() {
+
+        // Arrange
+        Mockito.when(cardRepository.findById(Mockito.anyString()))
+                .thenReturn(Optional.empty());
+
+        // Act + Assert
+        Assertions.assertThatThrownBy(() ->
+                        cardService.update("1234", cardRequest)
+                )
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("Card not found");
+
+        // Verify
+        Mockito.verify(cardRepository).findById("1234");
     }
 }
