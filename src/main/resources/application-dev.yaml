@@ -1,0 +1,33 @@
+server:
+  port: 8081
+spring:
+    application:
+        name: cards-microservice
+    
+    data:
+      mongodb:
+        uri: mongodb://root:example@localhost:27018/cards?authSource=admin
+    security:
+        oauth2:
+          resourceserver:
+            jwt:
+              issuer-uri: http://localhost:8080/realms/masterdeckai-realm
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
+aws:
+  s3:
+    endpoint: http://localhost:9000
+    access-key: minioadmin
+    secret-key: minioadmin
+    bucket: cards
+    region: us-east-1
+    
+

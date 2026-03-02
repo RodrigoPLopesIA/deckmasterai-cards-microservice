@@ -49,13 +49,13 @@ public class CardService {
 
     public Page<CardResponse> getCards(Pageable pageable, String profileId) {
         return cardRepository
-                .findAll(pageable, profileId)
+                .findByProfileId(profileId, pageable)
                 .map(cardMapper::cardToCardResponse);
     }
 
     public CardResponse getCardById(String id, String profileId) {
         return cardRepository
-                .findById(id, profileId)
+                .findByIdAndProfileId(id, profileId)
                 .map(cardMapper::cardToCardResponse)
                 .orElseThrow(() -> new NotFoundException("Card not found"));
     }
@@ -65,7 +65,7 @@ public class CardService {
         var card = findCardById(id);
         validateOwnership(card, profileId);
 
-        cardRepository.deleteById(id, profileId);
+        cardRepository.deleteByIdAndProfileId(id, profileId);
     }
 
     public List<String> getDecksByCardId(String id, String profileId) {

@@ -3,30 +3,5 @@ server:
 spring:
     application:
         name: cards-microservice
-    
-    mongodb:
-        uri: mongodb://root:example@localhost:27017/deckmasterai?authSource=admin
-    security:
-        oauth2:
-          resourceserver:
-            jwt:
-              issuer-uri: http://localhost:8080/realms/masterdeckai-realm
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-  endpoint:
-    health:
-      show-details: always
-
-aws:
-  s3:
-    endpoint: http://localhost:9000
-    access-key: minioadmin
-    secret-key: minioadmin
-    bucket: cards
-    region: us-east-1
-    
 

@@ -32,9 +32,6 @@ public record CardRequest(
         @Min(value = 0, message = "Defense must be positive")
         Integer defense,
 
-        @NotBlank(message = "ProfileId is required")
-        String profileId,
-
         List<String> deckIds,
 
         @NotBlank(message = "ImageUrl is required")
