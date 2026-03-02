@@ -151,7 +151,7 @@ class CardServiceTest {
     @Test
     void shouldReturnCardById() {
 
-        Mockito.when(cardRepository.findById("card-1", profileId))
+        Mockito.when(cardRepository.findByIdAndProfileId("card-1", profileId))
                 .thenReturn(Optional.of(card));
 
         Mockito.when(cardMapper.cardToCardResponse(card))
@@ -165,7 +165,7 @@ class CardServiceTest {
     @Test
     void shouldThrowNotFoundWhenGettingById() {
 
-        Mockito.when(cardRepository.findById("card-1", profileId))
+        Mockito.when(cardRepository.findByIdAndProfileId("card-1", profileId))
                 .thenReturn(Optional.empty());
 
         Assertions.assertThatThrownBy(() ->
@@ -185,7 +185,7 @@ class CardServiceTest {
 
         cardService.delete("card-1", profileId);
 
-        Mockito.verify(cardRepository).deleteById("card-1", profileId);
+        Mockito.verify(cardRepository).deleteByIdAndProfileId("card-1", profileId);
     }
 
     // =========================================
